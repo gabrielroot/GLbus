@@ -1,0 +1,5 @@
+1. Extraia o Arquivo "gconio.h" para o diretório Home (Pasta Pessoal)
+2. Abra o terminal (CTRL + ALT + T) e digite o comando 
+	sudo cp gconio.h /usr/include
+3. Digite a senha do usuário (nos Labs do Instituto = 123)
+4. Reinicie o Geany
