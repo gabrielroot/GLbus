@@ -11,7 +11,11 @@
  * Duração da viagem
  * Vagas disponiveis
  * Validações de rotas
- *
+ /////////////////////////////////
+ * 2 onibus para cada rota p/ dia 
+ * horario do onibus pre definido com RAND
+ * ORGANIZAR AS FUNCOES (comprar passagem chama reservavagas)
+ * configurar a ida volta
  */
  typedef struct
  {
