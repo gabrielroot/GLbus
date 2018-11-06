@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
-//#include <gconio.h>
+#include <gconio.h>
 /*Authors: Gabriel Ferreira && Lucas Pimenta
  *Date:
  *Description:
@@ -12,10 +12,13 @@
  * Vagas disponiveis
  * Validações de rotas
  /////////////////////////////////
- * 2 onibus para cada rota p/ dia 
+ * 2 onibus para cada rota p/ dia
  * horario do onibus pre definido com RAND
  * ORGANIZAR AS FUNCOES (comprar passagem chama reservavagas)
  * configurar a ida volta
+ * ///////////////////////////////
+ * O Busão está aceitando a vaga 0!
+ * CADASTRAR MAIS QUE 1 CLIENTE URGENTEMENTE (Atualmente, cada cliente pode comprar até 40 passagens, mas ainda não conseguimos cadastrar mais que 1 cliente)
  */
  typedef struct
  {
@@ -25,10 +28,10 @@
 
  typedef struct
  {
-	char nome[50],sexo;
-	int idade;
+	char nome[50][40],sexo[40];
+	int idade[40];
 	float passagens;
-	Endereco end;
+	Endereco end[40];
  }Pessoa;
 
  typedef struct
@@ -41,20 +44,45 @@
 
 Info locais[10];
 Pessoa cliente;
-char rotas[30][10];
-int x;
+
+int contaPassagens;
 
  void cadastra()
  {
+	 //int pass;
+
 	 printf("Quantas passagens? ");
-	 scanf(" %f",&cliente.passagens);		//estamos atendendo somente 1 cliente... precisamos de alocação dinamica aqui (prox. materia)
-	 printf("Qual o seu nome?: ");
-	 scanf(" %s", cliente.nome);
+	 scanf(" %f",&cliente.passagens);		// ATENÇÃO = estamos atendendo somente 1 cliente... precisamos de alocação dinamica aqui (prox. materia)
+	 for(int i=0; i<cliente.passagens; i++)
+	 {
+		system("clear");
+		printf("Cadastrar(%d°)\n",i+1);
+
+		printf("	Nome: ");
+		scanf(" %s", cliente.nome[i]);
+		printf("	Idade: ");
+		scanf(" %d", &cliente.idade[i]);
+		printf("	Sexo (M/F): ");
+		scanf(" %c", &cliente.sexo[i]);
+
+		printf("	Estado: (UF)");
+		scanf(" %s", cliente.end[i].uf);
+		printf("	Cidade: ");
+		scanf(" %s", cliente.end[i].cidade);
+		printf("	Rua: ");
+		scanf(" %s", cliente.end[i].rua);
+		printf("	Bairro: ");
+		scanf(" %s", cliente.end[i].bairro);
+
+		contaPassagens++;
+
+		system("clear");
+	}
  }
 
  int insereRotas()
  {
-
+	char rotas[30][10];
 
 	 strcpy(rotas[0],"Brasília");
 	 strcpy(rotas[1],"Tocantins");
@@ -80,13 +108,13 @@ int x;
  {
 	for(int i=0; i<10; i++)
 	{
-			printf("\n");
+		printf("\n");
 
-			printf("Rota: %s\n",locais[i].destino);
-			printf("Distância: %.0f Km\n",locais[i].distancia);
-			printf("Preço: R$ %.2f\n",locais[i].preco);
+		printf("Rota: %s\n",locais[i].destino);
+		printf("Distância: %.0f Km\n",locais[i].distancia);
+		printf("Preço: R$ %.2f\n",locais[i].preco);
 
-			printf("\n");
+		printf("\n");
 	}
 	return 0;
 }
@@ -120,36 +148,7 @@ int x;
 	}
  }
 
- int comprarPassagem()
- {
-	int retorno;
-	char ida;
-
-	while(retorno==0)
-		retorno=consultaRotas();
-
-	while((ida!='s')&&(ida!='n'))
-	{
-		printf("Ida & Volta? (s/n)");
-		scanf(" %c",&ida);
-	}
-	//printf("Deseja realmente ir para %s?",locais[retorno].destino);
-	cadastra();
-	if(ida=='s')											// se cliente quer ida e volta então paga em dobro, senão...
-		cliente.passagens*=locais[retorno].preco*2;
-	else
-		cliente.passagens*=locais[retorno].preco;
-
-	printf("Total: %.2f\n",cliente.passagens);
-
-	return 0;
- }
-void setVagas(Info bus[],int n)
-{
-    for(int i=0;i<n;i++)
-        bus[0].passagensDisponiveis[i] = 0;
-}
-void getVagas(Info bus[],int n)
+Info getVagas(Info bus[],int n)
 {
     int cont=0;
 
@@ -172,14 +171,10 @@ void getVagas(Info bus[],int n)
 
 }
 
-int reservaVagas(Info bus[],int n)
+int reservaVagas(Info bus[],int n,float quantVagas)
 {
     int vagaDesejada;
-    int quantVagas;
     int cont=0;
-
-    printf("Deseja reservar quantas vagas?\n");
-    scanf(" %d",&quantVagas);
 
     do{
         getVagas(bus,40);
@@ -198,39 +193,104 @@ int reservaVagas(Info bus[],int n)
 
     }while (cont!=quantVagas);
 
-
+	return 0;
 }
+
+ int comprarPassagem(Info bus[])
+ {
+	int retorno;
+	char ida;
+
+	while(retorno==0)
+		retorno=consultaRotas();
+
+	while((ida!='s')&&(ida!='n'))
+	{
+		printf("Ida & Volta? (s/n)");
+		scanf(" %c",&ida);
+	}
+	//printf("Deseja realmente ir para %s?",locais[retorno].destino);
+	cadastra();
+
+	if(ida=='s')// se cliente quer ida e volta então paga em dobro, senão...
+	{
+		reservaVagas(bus,40,cliente.passagens);
+		cliente.passagens*=locais[retorno].preco*2;
+	}
+	else
+	{
+		reservaVagas(bus,40,cliente.passagens);
+		cliente.passagens*=locais[retorno].preco;
+	}
+
+	printf("Total: %.2f\n",cliente.passagens);
+
+
+	return 0;
+ }
+void setVagas(Info bus[],int n)
+{
+    for(int i=0;i<n;i++)
+        bus[0].passagensDisponiveis[i] = 0;
+}
+
+ void getClientes()
+ {
+	char pass[10];
+	do
+	{
+		printf("Password Amnin: ");
+		scanf(" %[^\n]s",pass);
+		system("clear");
+		if(strcmp(pass,"123")==0)
+			for(int i=0; i<contaPassagens; i++)
+			{
+				printf("Consultar(%d°)\n",i+1);
+
+				printf("	Nome: %s\n", cliente.nome[i]);
+				printf("	Idade: %d\n", cliente.idade[i]);
+				printf("	Sexo: %c\n", cliente.sexo[i]);
+
+				printf("	Estado: %s\n", cliente.end[i].uf);
+				printf("	Cidade: %s\n", cliente.end[i].cidade);
+				printf("	Rua: %s\n", cliente.end[i].rua);
+				printf("	Bairro: %s\n", cliente.end[i].bairro);
+			}
+		else
+			printf("Senha incorreta!\n");
+	}while(strcmp(pass,"123")!=0);
+ }
+
 int main()
 {
 	Info bus[10];
 	char key;
-    setVagas(bus,40); //Zerando o vetor vagas (bus[i].passagensDisponiveis)
+	setVagas(bus,40); //Zerando o vetor vagas (bus[i].passagensDisponiveis)
 	srand(time(NULL));
 	insereRotas();
 
 	do
 	{
 		system("clear");
-		printf("===============================================\n"); //Fazer outra função para MENU()
+		printf("===============================================\n");
 		printf("=          1 - Consultar Todas as Rotas       =\n");
 		printf("=          2 - Pesquisar Rotas Específicas    =\n");
 		printf("=          3 - Comprar Passagem               =\n");
 		printf("=          4 - Consultar Vagas                =\n");
-		printf("=          5 - Reservar Vagas                 =\n");
+		printf("=          5 - Relatório de Vendas            =\n");
 		printf("=          0 - Sair                           =\n");
 		printf("===============================================\n");
 
 		setbuf(stdin,NULL);
 		key=getch();
 
-        int vagaDesejada;
 		switch (key)
 		{
 			case '1': consultaTodasRotas();break;
 			case '2': consultaRotas();break;
-			case '3': comprarPassagem();break;
+			case '3': comprarPassagem(bus);break;
 			case '4': getVagas(bus,40); break;
-			case '5': reservaVagas(bus,40); break;
+			case '5': getClientes(); break;
 		}
 
 		printf("Tecle ENTER...\n");
@@ -240,8 +300,3 @@ int main()
 	}while(key!='0');
 	return 0;
 }
-
-
-
-
-
