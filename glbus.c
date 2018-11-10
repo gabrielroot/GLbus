@@ -11,7 +11,7 @@
  * 2 onibus para cada rota p/ dia
  * horario do onibus pre definido com RAND
  * ///////////////////////////////
- * Ao imprimir o relatório, o sistema deverá informar qual assento o cliente escolheu, quanto ele pagou e se quer ida e volta
+ *
  */
 
  typedef struct
@@ -22,8 +22,8 @@
 
  typedef struct
  {
-	char nome[50][40],sexo[40],destino[20];
-	int idade[40],passagens,contaPassagens;
+	char nome[50][40],sexo[40],destino[20],ida;
+	int idade[40],passagens,contaPassagens,assento;
 	float preco;
 	Endereco end[40];
  }Pessoa;
@@ -39,7 +39,7 @@
  {
 	 //int pass;
 	 printf("Quantas passagens? ");
-	 scanf(" %d",&cliente->passagens);		// ATENÇÃO = estamos atendendo somente 1 cliente... precisamos de alocação dinamica aqui (prox. materia)
+	 scanf(" %d",&cliente->passagens);
 	 for(int i=0; i<cliente->passagens; i++)
 	 {
 		system("clear");
@@ -121,7 +121,7 @@
 			printf("Rota: %s\n",locais[i].destino);
 			printf("Distância: %.0f Km\n",locais[i].distancia);
 			printf("Preço: R$ %.2f\n",locais[i].preco);
-			return i;    										// Existe a rota
+			return i;    						// Existe a rota, e já retorna o índice dela
 		}
 	}
 
@@ -131,8 +131,7 @@
 		printf("Não Disponível!\n");
 
 	}
-					return 0;												//não existe a rota
-
+	return 0;				//não existe a rota
  }
 
 Info getVagas(Info bus[],int n)
@@ -158,26 +157,25 @@ Info getVagas(Info bus[],int n)
 
 }
 
-int reservaVagas(Info bus[],int* quantVagas)
+int reservaVagas(Info bus[],int* quantVagas,int *assento)
 {
-    int vagaDesejada;
     int cont=0;
 
     do{
         getVagas(bus,40);
         printf("Digite o numero da Vaga Desejada (de 1-40):\n");
         do
-			scanf(" %d",&vagaDesejada);
-		while(vagaDesejada<1 || vagaDesejada>40);
+			scanf(" %d",&*assento);
+		while(*assento<1 || *assento>40);
 
-        if(bus[0].passagensDisponiveis[vagaDesejada-1] == 0){
-            bus[0].passagensDisponiveis[vagaDesejada-1] = 1;
+        if(bus[0].passagensDisponiveis[*assento-1] == 0){
+            bus[0].passagensDisponiveis[*assento-1] = 1;
             printf("Vaga Reservada com sucesso!\n");
             cont++;
             if(cont == *quantVagas)
                 return 1;
         }
-        else if (bus[0].passagensDisponiveis[vagaDesejada-1] == 1)
+        else if (bus[0].passagensDisponiveis[*assento-1] == 1)
             printf("ATENÇÃO! Esta vaga já foi reservada!\nFavor escolher outra vaga!\n");
 
     }while (cont!=*quantVagas);
@@ -188,7 +186,6 @@ int reservaVagas(Info bus[],int* quantVagas)
  int comprarPassagem(Info bus[], Pessoa *cliente,Info locais[])
  {
 	int retorno;
-	char ida;
 	cliente->preco=0;
 	cliente->contaPassagens=0;
 
@@ -197,26 +194,21 @@ int reservaVagas(Info bus[],int* quantVagas)
 		retorno=consultaRotas(locais);
 	}while(!retorno);
 
-	while((ida!='s')&&(ida!='n'))
+	while((cliente->ida!='s')&&(cliente->ida!='n'))
 	{
 		printf("Ida & Volta? (s/n)");
-		scanf(" %c",&ida);
+		scanf(" %c",&cliente->ida);
 	}
-	//printf("Deseja realmente ir para %s?",locais[retorno].destino);
 	cadastra(&*cliente);
 
 	printf("\n--%d--\n",retorno);
 
-	if(ida=='s')// se cliente quer ida e volta então paga em dobro, senão...
-	{
-		reservaVagas(bus,&cliente->passagens);
+	reservaVagas(bus,&cliente->passagens,&cliente->assento);
+
+	if(cliente->ida=='s')// se cliente quer ida e volta então paga em dobro, senão...
 		cliente->preco=cliente->passagens*locais[retorno].preco*2;
-	}
 	else
-	{
-		reservaVagas(bus,&cliente->passagens);
 		cliente->preco=cliente->passagens*locais[retorno].preco;
-	}
 
 	strcpy(cliente->destino,locais[retorno].destino);
 	printf("Total: %.2f\n",cliente->preco);
@@ -251,7 +243,11 @@ void setVagas(Info bus[],int n)
 					printf("	Cidade: %s\n", cliente[j].end[i].cidade);
 					printf("	Rua: %s\n", cliente[j].end[i].rua);
 					printf("	Bairro: %s\n", cliente[j].end[i].bairro);
-					printf("	Destino: %s\n\n", cliente[j].destino);
+					printf("	Destino: %s\n", cliente[j].destino);
+					printf("	Assento: %d\n", cliente[j].assento);
+					printf("	N° passagens: %d\n", cliente[j].passagens);
+					printf("	Ida & Volta: %c\n", cliente[j].ida);
+					printf("	Total pago: %.2f\n\n", cliente[j].preco);
 				}
 			}
 		else
@@ -301,7 +297,6 @@ int main()
 		printf("Tecle ENTER...\n");
 		setbuf(stdin,NULL);
 		getch();
-
 	}while(key!='0');
 	return 0;
 }
