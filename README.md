@@ -13,5 +13,3 @@ A ideia do programa surgiu da disciplina de Modelos e Paradigmas da Programaçã
 solicitado que fizessemos um programa em python que fisesse o uso de um dos principais recursos 
 da programação procedural - as Funções. Como ainda não tvemos contato com a linguagem requerida, 
 optamos por escrever o código inicialmente em C, para que em um futuro não muito distante seja trasformado em python.
-
-Linkedin: www.linkedin.com/in/gabriel-santos-976003164
